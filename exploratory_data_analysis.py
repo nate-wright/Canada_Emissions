@@ -1,5 +1,5 @@
 import pandas as pd
-from Emissions_VAR_helper import generate_merged_dataframe, remove_with_grangers
+from Emissions_VAR_helper import best_diff_and_lag_value, generate_merged_dataframe, remove_with_grangers
 from VAR_helper import adfuller_test, grangers_causation_matrix, invert_transformation 
 from energy_preparation import * 
 from climate_preparation import * 
@@ -78,8 +78,8 @@ for column in train_diff_2:
 training_sets = [train, train_diff, train_diff_2]
 max_lag_value = 8 
 num_of_difs = 0
-min_mean = None 
-min_results = None 
+
+optimal_model_setup = best_diff_and_lag_value(new_df, training_sets, test, train, max_lag_value)
 
 for ts in training_sets:
     col_string = ""
@@ -118,7 +118,7 @@ model = VAR(train)
 model_fitted = model.fit(7)
 
 # forecast the model 
-forecast_input = new_df.values[-7:]
+forecast_input = train.values[-7:]
 
 fc = model_fitted.forecast(y=forecast_input, steps=3)
 df_forecast = pd.DataFrame(fc, index=new_df.index[-(len(new_df) - len(train)):], columns=new_df.columns)
